@@ -67,7 +67,6 @@ for i in range(len(images2_original)):
     eval_original[i, :, :] = img
 print(np.shape(eval_original))
 
-
 # ROTATE 90 train
 train_rot90 = np.zeros((60000,28,28), dtype=np.float32)
 images_rot90 = ["rot90/rot90{0}.png".format(k) for k in range(1,60000)]
@@ -152,7 +151,7 @@ for i in range(len(images2_flipud)):
     eval_flipud[i, :, :] = img
 print(np.shape(eval_flipud))
 
-
+"""
 # cutud train
 train_cutud = np.zeros((60000,28,28), dtype=np.float32)
 images_cutud = ["cutud/cutud/cutUD{0}.png".format(k) for k in range(1,60000)]
@@ -184,7 +183,7 @@ for i in range(len(images2_invbot)):
     img = np.array(Image.open(images2_invbot[i]))
     eval_invbot[i, :, :] = img
 print(np.shape(eval_invbot))
-
+"""
 ##PARAMETERS
 # Data params
 img_rows, img_cols = 28, 28
@@ -277,6 +276,7 @@ x_test5 = x_test5.astype('float32')
 x_train5 /= 255
 x_test5 /= 255
 
+"""
 x_train6 = train_cutud
 x_test6 = eval_cutud
 if K.image_data_format() == 'channels_first':
@@ -307,6 +307,8 @@ x_test7 = x_test7.astype('float32')
 x_train7 /= 255
 x_test7 /= 255
 
+
+
 x_train8 = train_checkerboard
 x_test8 = eval_checkerboard
 if K.image_data_format() == 'channels_first':
@@ -322,7 +324,7 @@ x_test8 = x_test8.astype('float32')
 x_train8 /= 255
 x_test8 /= 255
 
-
+"""
 
 ##MODEL 1
 model = Sequential()
@@ -472,6 +474,7 @@ print('Test accuracy:', score5[1])
 model5.save('trained_model5.h5')
 model6 = load_model('trained_model5.h5')
 
+"""
 ##MODEL 5
 # Continue training
 model6.fit(x_train6, y_train, 
@@ -557,4 +560,4 @@ print('Test accuracy:', score6[1])
 print('Seventh data set')
 print('Test loss:', score7[0])
 print('Test accuracy:', score7[1])
-
+"""
