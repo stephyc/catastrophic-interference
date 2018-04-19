@@ -74,8 +74,8 @@ ylabel('Accuracy', 'FontSize', 40);
 set(gca, 'XTick', xs);
 set(gca, 'XTickLabel', {'Original'}, 'FontSize', 20);
 hold off
-%% Allie's Data 2
-% original, 90, inv, flip ud
+%%
+% original, 90, check, inv
 
 % Training set 2
 xs = 1:2;
@@ -87,68 +87,27 @@ for i = 1:length(y2)
     set(b(i), 'FaceColor', barcmap(i,:));
     hold on
 end
-title('Training Round 2: Rotation 90', 'FontSize', 50);
+title('Results: Training and Testing on Each Dataset', 'FontSize', 50);
 xlabel('Image Mutation', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40);
 set(gca, 'XTick', xs);
 set(gca, 'XTickLabel', {'Original' 'Rotate 90'}, 'FontSize', 20);
-%% Allie's Data 3
+%%
 
 % Training set 3
-xs = 1:3;
-y3 = [.9644, .9566, .9419];
-b = bar(y3, 'FaceColor', 'flat');
+xs = 1:7;
+ys = [.9644, .9566, .9419, .9305, .8895, .9356, .9206];
+b = bar(ys, 'FaceColor', 'flat');
+barcmap = jet(length(ys));
 figure (3)
-for i = 1:length(y3)
-    b(i) = bar(xs(i), y3(i));
+for i = 1:length(ys)
+    b(i) = bar(xs(i), ys(i));
     set(b(i), 'FaceColor', barcmap(i,:));
     hold on
 end
-title('Training Round 3: Checkerboard', 'FontSize', 50);
+title('Results: Training and Testing on Each Dataset', 'FontSize', 50);
 xlabel('Image Mutation', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40);
 set(gca, 'XTick', xs);
-set(gca, 'XTickLabel', {'Original' 'Rotate 90' 'Inversion'}, 'FontSize', 20);
-
-%% Allie's Data 4
-% Training set 4
-xs = 1:4;
-y4 = [.9644, .9566, .9419, .9403];
-b = bar(y4, 'FaceColor', 'flat');
-figure(4)
-for i = 1:length(y4)
-    b(i) = bar(xs(i), y4(i));
-    set(b(i), 'FaceColor', barcmap(i,:));
-    hold on
-end
-title('Training Round 3: Checkerboard', 'FontSize', 50);
-xlabel('Image Mutation', 'FontSize', 40);
-ylabel('Accuracy', 'FontSize', 40);
-set(gca, 'XTick', xs);
-set(gca, 'XTickLabel', {'Original' 'Rotate 90' 'Inversion' 'Flip-UD'}, 'FontSize', 20);
-
-%% Stephanie's Data
-
-epochs = 1:5;
-figure(1)
-acc_original =[0.8888,0.9697,0.9772,0.9814,0.9827];
-plot(epochs, acc_original, '-o', 'LineWidth', 7, 'MarkerSize', 13);
-xlim([1, 5]);
-ylim([.25, 1]);
-title('Training Round 1: Original', 'FontSize', 50)
-xlabel('Epoch', 'FontSize', 40);
-ylabel('Accuracy', 'FontSize', 40)
-set(gca, 'FontSize', 30)
-legend('Original')
-
-figure(2)
-acc_rot90 =[0.9047,0.,0.9674,0.9754,0.9793,0.9824]; % acc
-acc_original_2 =[0.7928,0.6905,0.6029,0.5139,0.4359]; % val_acc
-plot(epochs, [acc_rot90; acc_original_2], '-o', 'LineWidth', 7, 'MarkerSize', 13);
-xlim([1, 5]);
-ylim([.25, 1]);
-title('Training Round 1: Original', 'FontSize', 50)
-xlabel('Epoch', 'FontSize', 40);
-ylabel('Accuracy', 'FontSize', 40)
-set(gca, 'FontSize', 30)
-legend('Original')
+set(gca, 'XTickLabel', {'Rotate 90' 'Invert' 'Flip LR' 'Swap TB' 'Checkerboard' 'Flip UD'...
+    'Invert Bottom'}, 'FontSize', 20);
