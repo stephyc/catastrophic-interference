@@ -59,7 +59,7 @@ barcmap = jet(4);
 
 % Training set 1
 xs = 1;
-y1 = .9;
+y1 = .9867;
 b = bar(y1, 'FaceColor', 'flat');
 figure(1)
 for i = 1:length(y1)
@@ -79,7 +79,7 @@ hold off
 
 % Training set 2
 xs = 1:2;
-y2 = [.9644, .9566];
+y2 = [.05064, .9881];
 b = bar(y2, 'FaceColor', 'flat');
 figure(2)
 for i = 1:length(y2)
@@ -96,7 +96,7 @@ set(gca, 'XTickLabel', {'Original' 'Rotate 90'}, 'FontSize', 20);
 
 % Training set 3
 xs = 1:3;
-y3 = [.9644, .9566, .9419];
+y3 = [.75524, .3679, .9905];
 b = bar(y3, 'FaceColor', 'flat');
 figure (3)
 for i = 1:length(y3)
@@ -104,7 +104,7 @@ for i = 1:length(y3)
     set(b(i), 'FaceColor', barcmap(i,:));
     hold on
 end
-title('Training Round 3: Checkerboard', 'FontSize', 50);
+title('Training Round 3: Inversion', 'FontSize', 50);
 xlabel('Image Mutation', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40);
 set(gca, 'XTick', xs);
@@ -113,7 +113,7 @@ set(gca, 'XTickLabel', {'Original' 'Rotate 90' 'Inversion'}, 'FontSize', 20);
 %% Allie's Data 4
 % Training set 4
 xs = 1:4;
-y4 = [.9644, .9566, .9419, .9403];
+y4 = [.2152, .2149, .468, .9403];
 b = bar(y4, 'FaceColor', 'flat');
 figure(4)
 for i = 1:length(y4)
@@ -121,7 +121,7 @@ for i = 1:length(y4)
     set(b(i), 'FaceColor', barcmap(i,:));
     hold on
 end
-title('Training Round 3: Checkerboard', 'FontSize', 50);
+title('Training Round 4: Flip Up-Down', 'FontSize', 50);
 xlabel('Image Mutation', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40);
 set(gca, 'XTick', xs);
@@ -142,13 +142,49 @@ set(gca, 'FontSize', 30)
 legend('Original')
 
 figure(2)
-acc_rot90 =[0.9047,0.,0.9674,0.9754,0.9793,0.9824]; % acc
+acc_rot90 =[0.9047,0.9674,0.9754,0.9793,0.9824]; % acc
 acc_original_2 =[0.7928,0.6905,0.6029,0.5139,0.4359]; % val_acc
-plot(epochs, [acc_rot90; acc_original_2], '-o', 'LineWidth', 7, 'MarkerSize', 13);
+plot(epochs, [acc_original_2; acc_rot90], '-o', 'LineWidth', 7, 'MarkerSize', 13);
 xlim([1, 5]);
-ylim([.25, 1]);
-title('Training Round 1: Original', 'FontSize', 50)
+ylim([0, 1]);
+title('Training Round 2: Rotated 90', 'FontSize', 50)
 xlabel('Epoch', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40)
 set(gca, 'FontSize', 30)
-legend('Original')
+legend('Original', 'Rotated 90')
+
+figure(3)
+acc_3 = [0.9419,0.9741,0.9805,0.9839,0.9859];
+acc_original_3 = [0.8580,0.7565,0.8086,0.7647,0.7626];
+plot(epochs, [acc_original_3; acc_3], '-o', 'LineWidth', 7, 'MarkerSize', 13);
+xlim([1, 5]);
+ylim([0, 1]);
+title('Training Round 3: ', 'FontSize', 50)
+xlabel('Epoch', 'FontSize', 40);
+ylabel('Accuracy', 'FontSize', 40)
+set(gca, 'FontSize', 30)
+legend('Original', 'Inversion')
+
+figure(4)
+acc_4 = [0.9121,0.9696,0.9761,0.9802,.9830];
+acc_original_4 = [0.2707,0.2293,0.2181,0.1811,0.1953];
+plot(epochs, [acc_original_4; acc_4], '-o', 'LineWidth', 7, 'MarkerSize', 13);
+xlim([1, 5]);
+ylim([0, 1]);
+title('Training Round 4: ', 'FontSize', 50)
+xlabel('Epoch', 'FontSize', 40);
+ylabel('Accuracy', 'FontSize', 40)
+set(gca, 'FontSize', 30)
+legend('Original', 'Flip-UD')
+
+figure(5)
+acc_5 = [0.9058,0.9681,0.9765,0.9797,0.9824];
+acc_original_5 = [0.1322,0.1702,0.1506,0.1660,0.1096];
+plot(epochs, [acc_original_5; acc_5], '-o', 'LineWidth', 7, 'MarkerSize', 13);
+xlim([1, 5]);
+ylim([0, 1]);
+title('Training Round 4: ', 'FontSize', 50)
+xlabel('Epoch', 'FontSize', 40);
+ylabel('Accuracy', 'FontSize', 40)
+set(gca, 'FontSize', 30)
+legend('Original', 'Round 5')
