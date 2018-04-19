@@ -29,6 +29,8 @@ from helpers import utils
 # from helpers import protocols
 # from helpers.keras_utils import LossHistory
 # from helpers.optimizers import KOOptimizer
+results = open("results.txt", "w+")
+results.write("Start of results")
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -50,7 +52,7 @@ print(np.shape(eval_labels))
 
 # original train
 train_original = np.zeros((60000,28,28), dtype=np.float32)
-images_original = ["MNIST-processed-training/original/original{0}.png".format(k) for k in range(1,60000)]
+images_original = ["original/original/original{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_original)):
     img = np.array(Image.open(images_original[i]))
     train_original[i, :, :] = img
@@ -58,7 +60,7 @@ print(np.shape(train_original))
 
 # original test
 eval_original = np.zeros((10000,28,28), dtype=np.float32)
-images2_original = ["MNIST-processed-test/original/test-original{0}.png".format(k) for k in range(1,10001)]
+images2_original = ["MNIST-processed-test/original/original/test-original{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_original)):
     img = np.array(Image.open(images2_original[i]))
     eval_original[i, :, :] = img
@@ -67,7 +69,7 @@ print(np.shape(eval_original))
 
 # ROTATE 90 train
 train_rot90 = np.zeros((60000,28,28), dtype=np.float32)
-images_rot90 = ["MNIST-processed-training/rot90/rot90{0}.png".format(k) for k in range(1,60000)]
+images_rot90 = ["rot90/rot90{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_rot90)):
     img = np.array(Image.open(images_rot90[i]))
     train_rot90[i, :, :] = img
@@ -75,7 +77,7 @@ print(np.shape(train_rot90))
 
 # ROTATE 90 test
 eval_rot90 = np.zeros((10000,28,28), dtype=np.float32)
-images2_rot90 = ["MNIST-processed-test/rot90/test-rot90{0}.png".format(k) for k in range(1,10001)]
+images2_rot90 = ["MNIST-processed-test/rot90/rot90/test-rot90{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_rot90)):
     img = np.array(Image.open(images2_rot90[i]))
     eval_rot90[i, :, :] = img
@@ -84,7 +86,7 @@ print(np.shape(eval_rot90))
 
 # checkerboard train
 train_checkerboard = np.zeros((60000,28,28), dtype=np.float32)
-images_checkerboard = ["MNIST-processed-training/checkerboard/fullcheck{0}.png".format(k) for k in range(1,60000)]
+images_checkerboard = ["checkerboard/checkerboard/fullcheck{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_checkerboard)):
     img = np.array(Image.open(images_checkerboard[i]))
     train_checkerboard[i, :, :] = img
@@ -92,7 +94,7 @@ print(np.shape(train_checkerboard))
 
 # checkerboard test
 eval_checkerboard = np.zeros((10000,28,28), dtype=np.float32)
-images2_checkerboard = ["MNIST-processed-test/checkerboard/test-checkerboard{0}.png".format(k) for k in range(1,10001)]
+images2_checkerboard = ["MNIST-processed-test/checkerboard/checkerboard/test-checkerboard{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_checkerboard)):
     img = np.array(Image.open(images2_checkerboard[i]))
     eval_checkerboard[i, :, :] = img
@@ -101,7 +103,7 @@ print(np.shape(eval_checkerboard))
 
 # INV train
 train_inv = np.zeros((60000,28,28), dtype=np.float32)
-images_inv = ["MNIST-processed-training/Inv/inv{0}.png".format(k) for k in range(1,60000)]
+images_inv = ["Inv/Inv/inv{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_inv)):
     img = np.array(Image.open(images_inv[i]))
     train_inv[i, :, :] = img
@@ -109,7 +111,7 @@ print(np.shape(train_inv))
 
 # INV test
 eval_inv = np.zeros((10000,28,28), dtype=np.float32)
-images2_inv = ["MNIST-processed-test/inv/test-inv{0}.png".format(k) for k in range(1,10001)]
+images2_inv = ["MNIST-processed-test/inv/inv/test-inv{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_inv)):
     img = np.array(Image.open(images2_inv[i]))
     eval_inv[i, :, :] = img
@@ -118,7 +120,7 @@ print(np.shape(eval_inv))
 
 # fliplr train
 train_fliplr = np.zeros((60000,28,28), dtype=np.float32)
-images_fliplr = ["MNIST-processed-training/fliplr/fliplr{0}.png".format(k) for k in range(1,60000)]
+images_fliplr = ["fliplr/fliplr/fliplr{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_fliplr)):
     img = np.array(Image.open(images_fliplr[i]))
     train_fliplr[i, :, :] = img
@@ -126,7 +128,7 @@ print(np.shape(train_fliplr))
 
 # fliplr test
 eval_fliplr = np.zeros((10000,28,28), dtype=np.float32)
-images2_fliplr = ["MNIST-processed-test/fliplr/test-fliplr{0}.png".format(k) for k in range(1,10001)]
+images2_fliplr = ["MNIST-processed-test/fliplr/fliplr/test-fliplr{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_fliplr)):
     img = np.array(Image.open(images2_fliplr[i]))
     eval_fliplr[i, :, :] = img
@@ -135,15 +137,15 @@ print(np.shape(eval_fliplr))
 
 # flipud train
 train_flipud = np.zeros((60000,28,28), dtype=np.float32)
-images_flipud = ["MNIST-processed-training/flipud/flipud{0}.png".format(k) for k in range(1,60000)]
+images_flipud = ["flipud/flipud/flipud{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_flipud)):
     img = np.array(Image.open(images_flipud[i]))
     train_flipud[i, :, :] = img
-print(np.shape(train_flipud)
+print(np.shape(train_flipud))
 
 # flipud test
 eval_flipud = np.zeros((10000,28,28), dtype=np.float32)
-images2_flipud = ["MNIST-processed-test/flipud/test-flipud{0}.png".format(k) for k in range(1,10001)]
+images2_flipud = ["MNIST-processed-test/flipud/flipud/test-flipud{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_flipud)):
     img = np.array(Image.open(images2_flipud[i]))
     eval_flipud[i, :, :] = img
@@ -152,7 +154,7 @@ print(np.shape(eval_flipud))
 
 # cutud train
 train_cutud = np.zeros((60000,28,28), dtype=np.float32)
-images_cutud = ["MNIST-processed-training/cutud/cutUD{0}.png".format(k) for k in range(1,60000)]
+images_cutud = ["cutud/cutud/cutUD{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_cutud)):
     img = np.array(Image.open(images_cutud[i]))
     train_cutud[i, :, :] = img
@@ -160,7 +162,7 @@ print(np.shape(train_cutud))
 
 # cutud test
 eval_cutud = np.zeros((10000,28,28), dtype=np.float32)
-images2_cutud = ["MNIST-processed-test/cutud/test-cutud{0}.png".format(k) for k in range(1,10001)]
+images2_cutud = ["MNIST-processed-test/cutud/cutud/test-cutud{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_cutud)):
     img = np.array(Image.open(images2_cutud[i]))
     eval_cutud[i, :, :] = img
@@ -168,7 +170,7 @@ print(np.shape(eval_cutud))
 
 # invbot train
 train_invbot = np.zeros((60000,28,28), dtype=np.float32)
-images_invbot = ["MNIST-processed-training/invbot/invbot{0}.png".format(k) for k in range(1,60000)]
+images_invbot = ["invbot/invbot/invbot{0}.png".format(k) for k in range(1,60000)]
 for i in range(len(images_invbot)):
     img = np.array(Image.open(images_invbot[i]))
     train_invbot[i, :, :] = img
@@ -176,7 +178,7 @@ print(np.shape(train_invbot))
 
 # invbot test
 eval_invbot = np.zeros((10000,28,28), dtype=np.float32)
-images2_invbot = ["MNIST-processed-test/invbot/test-invbot{0}.png".format(k) for k in range(1,10001)]
+images2_invbot = ["MNIST-processed-test/invbot/invbot/test-invbot{0}.png".format(k) for k in range(1,10001)]
 for i in range(len(images2_invbot)):
     img = np.array(Image.open(images2_invbot[i]))
     eval_invbot[i, :, :] = img
@@ -344,8 +346,8 @@ model.fit(x_train, y_train,
           verbose=1,
           validation_data=(x_test, y_test))
 score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+results.write('Test loss:', score[0])
+results.write('Test accuracy:', score[1])
 
 # Save trained model 1
 model.save('trained_model.h5')
@@ -361,13 +363,13 @@ model2.fit(x_train2, y_train,
 score1 = model2.evaluate(x_test, y_test, verbose=0)
 score2 = model2.evaluate(x_test2, y_test, verbose=0)
 
-print('Original data set')
-print('Test loss:', score1[0])
-print('Test accuracy:', score1[1])
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
 
-print('Second data set')
-print('Test loss:', score2[0])
-print('Test accuracy:', score2[1])
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
 
 # Save trained model 2
 model2.save('trained_model2.h5')
@@ -382,16 +384,177 @@ model3.fit(x_train3, y_train,
           validation_data=(x_test, y_test))
 score1 = model3.evaluate(x_test, y_test, verbose=0)
 score2 = model3.evaluate(x_test2, y_test, verbose=0)
-score2 = model3.evaluate(x_test3, y_test, verbose=0)
+score3 = model3.evaluate(x_test3, y_test, verbose=0)
 
-print('Original data set')
-print('Test loss:', score1[0])
-print('Test accuracy:', score1[1])
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
 
-print('Second data set')
-print('Test loss:', score2[0])
-print('Test accuracy:', score2[1])
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
 
-print('Third data set')
-print('Test loss:', score3[0])
-print('Test accuracy:', score3[1])
+results.write('Third data set')
+results.write('Test loss:', score3[0])
+results.write('Test accuracy:', score3[1])
+
+model3.save('trained_model3.h5')
+model4 = load_model('trained_model3.h5')
+
+##MODEL 4
+# Continue training
+model4.fit(x_train4, y_train, 
+          batch_size=batch_size, 
+          epochs=epochs, 
+          verbose=1,
+          validation_data=(x_test, y_test))
+score1 = model4.evaluate(x_test, y_test, verbose=0)
+score2 = model4.evaluate(x_test2, y_test, verbose=0)
+score3 = model4.evaluate(x_test3, y_test, verbose=0)
+score4 = model4.evaluate(x_test4, y_test, verbose=0)
+
+results.write("-----------------------------")
+
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
+
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
+
+results.write('Third data set')
+results.write('Test loss:', score3[0])
+results.write('Test accuracy:', score3[1])
+
+results.write('Fourth data set')
+results.write('Test loss:', score4[0])
+results.write('Test accuracy:', score4[1])
+
+model4.save('trained_model4.h5')
+model5 = load_model('trained_model4.h5')
+
+##MODEL 5
+# Continue training
+model5.fit(x_train5, y_train, 
+          batch_size=batch_size, 
+          epochs=epochs, 
+          verbose=1,
+          validation_data=(x_test, y_test))
+score1 = model5.evaluate(x_test, y_test, verbose=0)
+score2 = model5.evaluate(x_test2, y_test, verbose=0)
+score3 = model5.evaluate(x_test3, y_test, verbose=0)
+score4 = model5.evaluate(x_test4, y_test, verbose=0)
+score5 = model5.evaluate(x_test5, y_test, verbose=0)
+
+results.write("-----------------------------------------")
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
+
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
+
+results.write('Third data set')
+results.write('Test loss:', score3[0])
+results.write('Test accuracy:', score3[1])
+
+results.write('Fourth data set')
+results.write('Test loss:', score4[0])
+results.write('Test accuracy:', score4[1])
+
+results.write('Fifth data set')
+results.write('Test loss:', score5[0])
+results.write('Test accuracy:', score5[1])
+
+model5.save('trained_model5.h5')
+model6 = load_model('trained_model5.h5')
+
+##MODEL 5
+# Continue training
+model6.fit(x_train6, y_train, 
+          batch_size=batch_size, 
+          epochs=epochs, 
+          verbose=1,
+          validation_data=(x_test, y_test))
+score1 = model6.evaluate(x_test, y_test, verbose=0)
+score2 = model6.evaluate(x_test2, y_test, verbose=0)
+score3 = model6.evaluate(x_test3, y_test, verbose=0)
+score4 = model6.evaluate(x_test4, y_test, verbose=0)
+score5 = model6.evaluate(x_test5, y_test, verbose=0)
+score6 = model6.evaluate(x_test6, y_test, verbose=0)
+
+results.write("--------------------------------------")
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
+
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
+
+results.write('Third data set')
+results.write('Test loss:', score3[0])
+results.write('Test accuracy:', score3[1])
+
+results.write('Fourth data set')
+results.write('Test loss:', score4[0])
+results.write('Test accuracy:', score4[1])
+
+results.write('Fifth data set')
+results.write('Test loss:', score5[0])
+results.write('Test accuracy:', score5[1])
+
+results.write('Sixth data set')
+results.write('Test loss:', score6[0])
+results.write('Test accuracy:', score6[1])
+
+model6.save('trained_model6.h5')
+model7 = load_model('trained_model6.h5')
+
+##MODEL 5
+# Continue training
+model7.fit(x_train7, y_train, 
+          batch_size=batch_size, 
+          epochs=epochs, 
+          verbose=1,
+          validation_data=(x_test, y_test))
+score1 = model7.evaluate(x_test, y_test, verbose=0)
+score2 = model7.evaluate(x_test2, y_test, verbose=0)
+score3 = model7.evaluate(x_test3, y_test, verbose=0)
+score4 = model7.evaluate(x_test4, y_test, verbose=0)
+score5 = model7.evaluate(x_test5, y_test, verbose=0)
+score6 = model7.evaluate(x_test6, y_test, verbose=0)
+score7 = model7.evaluate(x_test7, y_test, verbose=0)
+
+results.write("--------------------------------------")
+results.write('Original data set')
+results.write('Test loss:', score1[0])
+results.write('Test accuracy:', score1[1])
+
+results.write('Second data set')
+results.write('Test loss:', score2[0])
+results.write('Test accuracy:', score2[1])
+
+results.write('Third data set')
+results.write('Test loss:', score3[0])
+results.write('Test accuracy:', score3[1])
+
+results.write('Fourth data set')
+results.write('Test loss:', score4[0])
+results.write('Test accuracy:', score4[1])
+
+results.write('Fifth data set')
+results.write('Test loss:', score5[0])
+results.write('Test accuracy:', score5[1])
+
+results.write('Sixth data set')
+results.write('Test loss:', score6[0])
+results.write('Test accuracy:', score6[1])
+
+results.write('Seventh data set')
+results.write('Test loss:', score7[0])
+results.write('Test accuracy:', score7[1])
+
+results.close()
