@@ -159,7 +159,7 @@ acc_original_3 = [0.8580,0.7565,0.8086,0.7647,0.7626];
 plot(epochs, [acc_original_3; acc_3], '-o', 'LineWidth', 7, 'MarkerSize', 13);
 xlim([1, 5]);
 ylim([0, 1]);
-title('Training Round 3: ', 'FontSize', 50)
+title('Training Round 3: Inversion', 'FontSize', 50)
 xlabel('Epoch', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40)
 set(gca, 'FontSize', 30)
@@ -171,7 +171,7 @@ acc_original_4 = [0.2707,0.2293,0.2181,0.1811,0.1953];
 plot(epochs, [acc_original_4; acc_4], '-o', 'LineWidth', 7, 'MarkerSize', 13);
 xlim([1, 5]);
 ylim([0, 1]);
-title('Training Round 4: ', 'FontSize', 50)
+title('Training Round 4: Flip Up-Down', 'FontSize', 50)
 xlabel('Epoch', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40)
 set(gca, 'FontSize', 30)
@@ -183,8 +183,8 @@ acc_original_5 = [0.1322,0.1702,0.1506,0.1660,0.1096];
 plot(epochs, [acc_original_5; acc_5], '-o', 'LineWidth', 7, 'MarkerSize', 13);
 xlim([1, 5]);
 ylim([0, 1]);
-title('Training Round 4: ', 'FontSize', 50)
+title('Training Round 5: Bottom Inversion', 'FontSize', 50)
 xlabel('Epoch', 'FontSize', 40);
 ylabel('Accuracy', 'FontSize', 40)
 set(gca, 'FontSize', 30)
-legend('Original', 'Round 5')
+legend('Original', 'Bottom Inversion')
