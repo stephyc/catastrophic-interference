@@ -1,0 +1,90 @@
+(60000,)
+(10000,)
+(60000, 28, 28)
+(10000, 28, 28)
+(60000, 28, 28)
+(10000, 28, 28)
+(60000, 28, 28)
+(10000, 28, 28)
+(60000, 28, 28)
+(10000, 28, 28)
+(60000, 28, 28)
+(10000, 28, 28)
+(60000, 28, 28)
+(10000, 28, 28)
+Train on 60000 samples, validate on 10000 samples
+Epoch 1/5
+2018-04-19 12:01:30.619801: I T:\src\github\tensorflow\tensorflow\core\platform\cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.3910 - acc: 0.8773 - val_loss: 0.0928 - val_acc: 0.9696
+Epoch 2/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.1076 - acc: 0.9679 - val_loss: 0.0515 - val_acc: 0.9835
+Epoch 3/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.0786 - acc: 0.9760 - val_loss: 0.0398 - val_acc: 0.9868
+Epoch 4/5
+60000/60000 [==============================] - 258s 4ms/step - loss: 0.0655 - acc: 0.9799 - val_loss: 0.0333 - val_acc: 0.9891
+Epoch 5/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.0563 - acc: 0.9827 - val_loss: 0.0383 - val_acc: 0.9867
+Test loss: 0.03825525404292857
+Test accuracy: 0.9867
+Train on 60000 samples, validate on 10000 samples
+Epoch 1/5
+60000/60000 [==============================] - 262s 4ms/step - loss: 0.3231 - acc: 0.9077 - val_loss: 0.6596 - val_acc: 0.7954
+Epoch 2/5
+60000/60000 [==============================] - 260s 4ms/step - loss: 0.1104 - acc: 0.9675 - val_loss: 1.2605 - val_acc: 0.6648
+Epoch 3/5
+60000/60000 [==============================] - 261s 4ms/step - loss: 0.0868 - acc: 0.9737 - val_loss: 1.5547 - val_acc: 0.5784
+Epoch 4/5
+60000/60000 [==============================] - 260s 4ms/step - loss: 0.0728 - acc: 0.9786 - val_loss: 2.3885 - val_acc: 0.4907
+Epoch 5/5
+60000/60000 [==============================] - 260s 4ms/step - loss: 0.0622 - acc: 0.9814 - val_loss: 2.1992 - val_acc: 0.5064
+Original data set
+Test loss: 2.199169082069397
+Test accuracy: 0.5064
+Second data set
+Test loss: 0.034937220360540956
+Test accuracy: 0.9881
+Train on 60000 samples, validate on 10000 samples
+Epoch 1/5
+60000/60000 [==============================] - 260s 4ms/step - loss: 0.2074 - acc: 0.9400 - val_loss: 0.6088 - val_acc: 0.7797
+Epoch 2/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.0829 - acc: 0.9749 - val_loss: 0.3715 - val_acc: 0.8732
+Epoch 3/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.0640 - acc: 0.9803 - val_loss: 0.6067 - val_acc: 0.7986
+Epoch 4/5
+60000/60000 [==============================] - 259s 4ms/step - loss: 0.0551 - acc: 0.9836 - val_loss: 0.8112 - val_acc: 0.7491
+Epoch 5/5
+60000/60000 [==============================] - 263s 4ms/step - loss: 0.0472 - acc: 0.9853 - val_loss: 0.8369 - val_acc: 0.7524
+Original data set
+Test loss: 0.8368887896299362
+Test accuracy: 0.7524
+Second data set
+Test loss: 3.361742441177368
+Test accuracy: 0.3679
+Third data set
+Test loss: 0.028098958297784703
+Test accuracy: 0.9905
+Train on 60000 samples, validate on 10000 samples
+Epoch 1/5
+60000/60000 [==============================] - 260s 4ms/step - loss: 0.3193 - acc: 0.9083 - val_loss: 2.2299 - val_acc: 0.3726
+Epoch 2/5
+60000/60000 [==============================] - 310s 5ms/step - loss: 0.1178 - acc: 0.9658 - val_loss: 2.6773 - val_acc: 0.3289
+Epoch 3/5
+60000/60000 [==============================] - 346s 6ms/step - loss: 0.0885 - acc: 0.9740 - val_loss: 3.8655 - val_acc: 0.2255
+Epoch 4/5
+60000/60000 [==============================] - 341s 6ms/step - loss: 0.0721 - acc: 0.9785 - val_loss: 3.8812 - val_acc: 0.2398
+Epoch 5/5
+60000/60000 [==============================] - 387s 6ms/step - loss: 0.0640 - acc: 0.9808 - val_loss: 4.6580 - val_acc: 0.2152
+-----------------------------
+Original data set
+Test loss: 4.658011458587646
+Test accuracy: 0.2152
+Second data set
+Test loss: 5.044480073547363
+Test accuracy: 0.2149
+Third data set
+Test loss: 3.389402949142456
+Test accuracy: 0.468
+Fourth data set
+Test loss: 0.03599673119182698
+Test accuracy: 0.9884
+Train on 60000 samples, validate on 10000 samples
