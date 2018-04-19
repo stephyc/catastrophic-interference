@@ -31,23 +31,25 @@ set(gca, 'XTickLabel', {'Rotate 90 degrees' 'Invert' 'Flip Left-Right' 'Swap Top
 epochs = 1:5;
 figure(1)
 y1 = [.979, .9778, .9816, .9834, .9854];
-plot(epochs, y1, '-o');
+plot(epochs, y1, '-o', 'LineWidth', 7, 'MarkerSize', 13);
 xlim([1, 5]);
 ylim([.25, 1]);
-title('Initial training: Original set')
-xlabel('Epoch');
-ylabel('Accuracy')
+title('Initial training: Original set', 'FontSize', 50)
+xlabel('Epoch', 'FontSize', 40);
+ylabel('Accuracy', 'FontSize', 40)
+set(gca, 'FontSize', 30)
 legend('Original')
 
 % trained/tested: rot90, original/rot90
 figure(2)
 y2rot = [.9066, .9673, .9749, .9792, .9819];
 y2orig = [.7349, .5208, .5220, .5056, .4279];
-plot(epochs, [y2rot; y2orig], '-o');
+plot(epochs, [y2orig; y2rot], '-o', 'LineWidth', 7, 'MarkerSize', 13);
 hold on
 xlim([1, 5]);
 ylim([.25, 1]);
-title('Second training: Rotated 90 set')
-xlabel('Epoch');
-ylabel('Accuracy')
-legend('Rotated 90', 'Original')
+title('Second training: Rotated 90 set', 'FontSize', 50)
+xlabel('Epoch', 'FontSize', 40);
+ylabel('Accuracy', 'FontSize', 40)
+set(gca, 'FontSize', 30);
+legend('Original', 'Rotated 90')
