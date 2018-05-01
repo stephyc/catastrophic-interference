@@ -169,9 +169,6 @@ model2.compile(loss=keras.losses.categorical_crossentropy,
              optimizer=keras.optimizers.Adadelta(),
              metrics=['accuracy'])
 
-model.save('trained_model.h5')
-model2 = load_model('trained_model.h5')
-
 x_train2 = train_rot90
 x_test2 = eval_rot90
 
