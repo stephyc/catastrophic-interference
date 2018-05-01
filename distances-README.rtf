@@ -1,0 +1,63 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf400
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Walkthrough of the MNIST-image-distance folder\
+\'97\
+\
+
+\b 1: Miscellaneous files
+\b0 \
+	- bluewhitered folder\
+	- bluewhitered.m\
+\
+colormap files: centers colormap on 0, positive values red and negative values blue\
+used as `colormap(bluewhitered)\'92\
+\
+	- ssimvals.mat\
+Workspace files containing a cell array of structures, `distances\'92, with the mean SSIM value of comparing each image of each digit in each dataset to the mean digit of that dataset. Kept so that even if everything else is lost we don\'92t have to run that again (~15 minutes to run)\
+\
+	-full.mat\
+Where I last left off in the workspace: currently, distances contains everything through the correlations part of the analysis half of the main file (catastrophicInterferenceDistances.m). A lot of the values are leftover and useless, but I haven\'92t gone through it to clean up what\'92s still useful and what\'92s been renamed.\
+\
+
+\b 2: catastrophicInterferenceDistances.m: analysis
+\b0 \
+\
+\ul Load MNIST\ulnone : Loads images and labels as ims and labels\
+\
+\ul Loop over all manipulations\ulnone : adds mean image of all manipulations into a cell array of structs called distances\
+\
+\ul Calculate average ssimval for each image in each dataset\ulnone : Calculates SSIM value comparing each image with its corresponding mean digit in each dataset, loops through all datasets, finds the mean per image per dataset. Takes ~15 minutes to run completely, stores values in each structure in distances. Can be found in the ssimvals.mat file\
+SSIM is a measure of similarity between images \'97 but tends to be used for image quality preservation rather than what we\'92re using it for. Still probably an interesting measure to take.\
+\
+\ul Linearize each image\ulnone : Each image currently stored as 28x28 array of grayscale values, this section stores it in the distances structs as a 1x784 array of grayscale values.\
+\
+\ul Correlation within datasets\ulnone : Finds the correlation of each digit to each other digit within a dataset, storing it as a field called `incorrs\'92 in each distances struct. i.e., correlation of 0 and 0, 0 and 1, 0 and 2, 0 and 3 in original, then 0 and 0, 0 and 1, 0 and 2, 0 and 3 in fliplr, etc.\
+\
+\ul Correlation with same number, other datasets\ulnone : Finds correlation of each digit to the same digit in a different dataset, storing it as a field called `outcorrs\'92 in each distances struct. i.e., correlation of 0 (original) and 0 (fliplr), 0 (original) and 0 (flipud), etc.\
+\
+
+\b 3: catastrophicInterferenceDistances.m: Plotting
+\b0 \
+All sections relevant to this part start with `Plotting:\'92 in the section title.\
+\
+\ul ssimvals (comparing digits across manips\ulnone : Produces a figure containing 8 line plots showing how the ssim value changes across digits in each manipulation (saved as SSIM by digit in the SSIM folder)\
+\
+\ul ssimvals (comparing manips across digits)\ulnone : Produces 10 figures, each a line plot showing how the ssim value changes across manipulations for each digit (saved as SSIM-manip# in the SSIM folder, where # is the digit that\'92s being examined)\
+\
+\ul all average values\ulnone : Produces 8 figures, each of which contains the mean image for each dataset. Saved as meanims-[manip] in the meanims folder, where [manip] is the manipulation\
+\
+\ul correlations (digit to digit)\ulnone : Produces a figure of 8 subplots, representing the correlation matrix of each digit to each other digit in a manipulation as a color matrix. A lighter color means a less correlated value (also goes into blue if negatively correlated, but that doesn\'92t show up here). The \'93color axis\'94 can be changed \'97 i.e., you can set the color limits to whatever you want, which you may want to play with to look at how closely related things are in the checkerboard and invbot images. Saved as `digit-digit-correlation\'92 in the correlations folder\
+	Pretty noteworthy is that all the correlation matrices fall into one of two categories, one of which contains checkerboard and invbot (more closely correlated), one of which contains the rest. This is likely because in the checkerboard and invbot manipulations, approximately half of the pixels are guaranteed to be the same, increasing correlation, while the other manipulations do not seem to change the correlations between the digits at all.\
+	As a potential TODO: could also check each row of corrmat against the other rows to verify that the correlations are in fact exactly the same for the manipulations in the two categories, but this seems excessive.\
+\
+\ul correlations (dataset to dataset)\ulnone : Produces 10 figures, each of which represents the correlation matrix of each manipulation to each other manipulation for one digit. Blue represents negative values, red represents positive values, lighter values are closer to 0. Figures saved as `manip-manip-corr#\'92 in the correlations folder, where # is the digit number\
+	As expected, the checkerboard manipulation has 0 correlation with the other manipulations across all digits, while, the inverse manipulation is strongly negatively correlated with the original (but with varying degrees of strength across digits, for some reason).\
+	TODO: analyze this more closely: block of well-correlated manipulations, negative vs. positive correlation, variance over digits\'85\
+\
+\ul clustering? dendrogram?\ulnone : Working on this section. Labels 1-10 are the original dataset, digits 0-9 (label 1 = original 0, label 2 = original 1, etc.), 11-21 = fliplr, etc \'97 in the order of maniplabels from the top of the script. Working on better labeling and making the figure for this section.\
+}
