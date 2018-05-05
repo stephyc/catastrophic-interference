@@ -218,7 +218,8 @@ for i = 1:10
     for j = 1:8
         corrmat(j, :) = distances{j, i}.zscoredcorr;
     end
-    corrmat = abs(corrmat);
+    % abs val line
+    % corrmat = abs(corrmat);
     imagesc(corrmat)
     colormap(bluewhitered)
     xticklabels(maniplabels);
@@ -227,10 +228,10 @@ for i = 1:10
     colorbar
     
     % regular
-    % caxis([-1, 1])
+    % caxis([-1.9, 2])
     
     % absvalue
-    caxis([0, 1])
+    % caxis([0, 1])
 end
 
 %% try clustering?
