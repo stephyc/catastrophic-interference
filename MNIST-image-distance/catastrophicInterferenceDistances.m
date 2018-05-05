@@ -4,7 +4,6 @@
 ims = loadMNISTImages("train-images-idx3-ubyte");
 labels = loadMNISTLabels("train-labels-idx1-ubyte");
 
-
 %% make variables
 nums = cell(8, 10);
 fullmean = zeros(28, 28, 8);
@@ -82,6 +81,36 @@ for i = 1:8
     end
 end
 
+%% Z-score manip-manip correlations
+
+for manip1 = 1:8
+    for digit = 1:10
+        distances{manip1, digit}.zoutcorrs = zeros(1, 10);
+        for manip2 = 1:8
+            distances{manip1, digit}.zoutcorrs = zscore(distances{manip1, digit}.outcorrs);
+        end
+    end
+end
+
+%% Z-score by all correlation values
+temp = zeros(size(distances, 1), size(distances, 2), size(distances{1, 1}.outcorrs, 2));
+
+for manip1 = 1:8
+    for digit = 1:10
+        temp(manip1, digit, :) = distances{manip1, digit}.outcorrs;
+    end
+end
+
+temp = reshape(temp, 1, size(temp, 1) * size(temp, 2) * size(temp, 3));
+zscores = zscore(temp);
+zscores = reshape(zscores, size(distances, 1), size(distances, 2), size(distances{1, 1}.outcorrs, 2));
+
+for manip1 = 1:8
+    for digit = 1:10
+        distances{manip1, digit}.zscoredcorr = zscores(manip1, digit, :);
+    end
+end
+
 %% Jaccard
 
 %% PCA?
@@ -136,9 +165,13 @@ for j = 1:8
     end
     imagesc(corrmat)
     colormap(bluewhitered)
-    xticklabels(0:9);
-    yticklabels(0:9);
-    title(['Digit to digit correlation (mean image): ', maniplabels{j}]);
+    xticks(0:10);
+    yticks(0:10);
+    xticklabels([1, 0:9]);
+    yticklabels([1, 0:9]);
+    title(['Digit Similarity: ', maniplabels{j}]);
+    xlabel('Digit')
+    ylabel('Digit')
     colorbar
     caxis([0, 1])
 end
@@ -157,6 +190,47 @@ for i = 1:10
     title(['Manip to manip correlation (mean image): ', int2str(i - 1)]);
     colorbar
     caxis([-1, 1])
+end
+
+%% Plotting: correlations (dataset to dataset, z-score per dataset, opt. abs val)
+
+for i = 1:10
+    im = figure(i);
+    corrmat = zeros(8);
+    for j = 1:8
+        corrmat(j, :) = distances{j, i}.zoutcorrs;
+    end
+    % corrmat = abs(corrmat);
+    imagesc(corrmat)
+    colormap(bluewhitered)
+    xticklabels(maniplabels);
+    yticklabels(maniplabels);
+    title(['Dataset to dataset mean image correlation z-scored (over dataset): ', int2str(i - 1)]);
+    colorbar
+    caxis([0, 1])
+end
+
+%% Plotting: correlations (dataset to dataset, z-score overall, opt. abs val)
+
+for i = 1:10
+    im = figure(i);
+    corrmat = zeros(8);
+    for j = 1:8
+        corrmat(j, :) = distances{j, i}.zscoredcorr;
+    end
+    corrmat = abs(corrmat);
+    imagesc(corrmat)
+    colormap(bluewhitered)
+    xticklabels(maniplabels);
+    yticklabels(maniplabels);
+    title(['Dataset to dataset mean image correlation z-scored (over all): ', int2str(i - 1)]);
+    colorbar
+    
+    % regular
+    % caxis([-1, 1])
+    
+    % absvalue
+    caxis([0, 1])
 end
 
 %% try clustering?
