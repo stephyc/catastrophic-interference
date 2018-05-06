@@ -25,10 +25,12 @@ from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from keras.optimizers import SGD, Adam, RMSprop, Optimizer 
 from keras.callbacks import Callback 
 from collections import OrderedDict 
+from utils import ema
+#from skdata import larochelle_etal_2007 as l7 
 
 from helpers import utils 
 from synapticpenalty import importancePenalty
-from kerasoptimizer import SynapticOptimizer as SO 
+from optimizers import SynapticOptimizer as SO 
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -44,6 +46,8 @@ PATH_INT_PROTOCOL = lambda omega_decay, xi: (
         ],
     'task_updates':  [
         ('omega',     lambda vars, w, prev_val: tf.nn.relu( ema(omega_decay, prev_val, vars['grads2'][w]/((vars['cweights'][w]-w.value())**2+xi)) ) ),
+        #('cached_grads2', lambda vars, w, prev_val: vars['grads2'][w]),
+        #('cached_cweights', lambda vars, w, prev_val: vars['cweights'][w]),
         ('cweights',  lambda opt, w, prev_val: w.value()),
         ('grads2', lambda vars, w, prev_val: prev_val*0.0 ),
     ],
@@ -56,12 +60,12 @@ train_size = 60000
 test_size = 10000
 batch_size = 256
 num_classes = 10
-epochs = 5
-lr = 0.01
+epochs = 20
+lr = 0.001
 xi = 0.1
 
 # Architecture params
-hidden_neurons = 3000
+hidden_neurons = 2000
 activation_fn = tf.nn.relu 
 output_fn = tf.nn.softmax
 
@@ -118,13 +122,32 @@ def createDataset(name, trainsrc, testsrc):
 
 	return (train, test)
 
+reset_optimizer = False
 # import all permuted datasets (paths = local paths in filesystem)
+def createRandomizedDataset():
+
+	tasks = ['MNIST_Basic','MNIST_Rotated', 'MNIST_Noise1', 'MNIST_Noise3', 'MNIST_Noise5']
+
+	datasets = list()
+	for i in range(len(tasks)):
+		name = tasks[i]
+		ref = getattr(l7.dataset, name)
+		task = ref.classification_task()
+		raw_data, raw_labels = task 
+		classes = 10
+		training_ex = len(raw_data) * 1/7
+		labels = np_utils.to_categorical(raw_labels, classes)
+		data = raw_data.reshape(x_train.shape[0], img_rows * img_cols)
+		datasets[i] = {"train": data[:training_ex], "test": data[training_ex:], \
+		               "trainlabels":labels[:training_ex], "tstlabels":labels[training_ex:]}
+	return datasets
+
 def importData():
 	srcs = [("original", "original/original/original", "original/original/test-original"),\
 			("rot90", "rot90/rot90", "rot90/rot90/test-rot90"), \
 			("fliplr", "fliplr/fliplr/fliplr", "fliplr/fliplr/test-fliplr"), #\
-			#("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
-			#("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
+			("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
+			("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
 			#("inv", "Inv/Inv/inv", "inv/inv/test-inv"), \
 			#("cutud","cutud/cutud/cutUD", "cutud/cutud/test-cutud"),\
 			#("invbot", "invbot/invbot/invbot", "invbot/invbot/test-invbot"), ]
@@ -160,7 +183,8 @@ def importData():
 	return data
 
 # open file for output data
-file = open("solutionresults2.txt", 'w+')
+fn = "solutionresults"
+
 
 # build model
 model = Sequential()
@@ -178,13 +202,17 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 			  optimizer=oopt,
 			  metrics=['accuracy'])
 
+#data = createRandomizedDataset()
+config = tf.ConfigProto()
 data = importData()
+sess = tf.InteractiveSession(config=config)
+sess.run(tf.global_variables_initializer())
 
 ntasks = len(data)
 
-training_order = shuffleOrder(len(data))
-training_order = training_order[0:5]
-strengths = [0.1, 1.0]
+training_order = [2, 1, 0, 3, 4]
+#training_order = training_order[0:5]
+strengths = [0, 1.0]
 
 evals = dict()
 
@@ -194,6 +222,8 @@ for strength in strengths:
 	evals[strength] = dict()
 
 	for train in training_order:
+		filename = "{0}{1}2.txt".format(fn, train)
+		file = open(filename, 'w+')
 		evals[strength][train] = list()
 		mess = "Training on task {0}".format(train)
 		print(mess)
@@ -211,22 +241,12 @@ for strength in strengths:
 			mess = "Data set {0}:\nTest loss:{1}\ntest accuracy:{2}\n".format(d, scores[d][0], scores[d][1])
 			print(mess)
 			file.write(mess)
+		file.close() 
 
-	model = Sequential()
-	model.add(Dense(hidden_neurons, activation=activation_fn, input_dim=input_size))
-	model.add(Dense(hidden_neurons, activation=activation_fn))
-	model.add(Dense(output_size, activation=output_fn))
+	if reset_optimizer:
+		 oopt.reset_optimizer()
 
-	opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-	pro_name, pro = PATH_INT_PROTOCOL(omega_decay="sum", xi=xi)
 
-	oopt = SO(opt=opt, model=model, **pro)
-
-	model.compile(loss=keras.losses.categorical_crossentropy,
-			  optimizer=oopt,
-			  metrics=['accuracy'])
-
-file.close() 
 
 """
 cNorm  = colors.Normalize(vmin=-5, vmax=np.log(np.max(list(evals.keys()))))

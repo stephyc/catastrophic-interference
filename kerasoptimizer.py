@@ -38,7 +38,7 @@ class SynapticOptimizer(Optimizer):
 			self.opt = opt
 			self.compute_average_weights = compute_average_weights
 
-
+ 
 		def set_strength(self, val):
 				K.set_value(self.lam, val)
 
