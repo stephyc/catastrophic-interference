@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import sys, os
 import numpy as np
+from keras.utils import np_utils
 import scipy
 import tensorflow as tf 
 
@@ -26,7 +27,8 @@ from keras.optimizers import SGD, Adam, RMSprop, Optimizer
 from keras.callbacks import Callback 
 from collections import OrderedDict 
 from utils import ema
-#from skdata import larochelle_etal_2007 as l7 
+from skdata.larochelle_etal_2007 import dataset as l7 
+import fisher_comp
 
 from helpers import utils 
 from synapticpenalty import importancePenalty
@@ -51,6 +53,9 @@ PATH_INT_PROTOCOL = lambda omega_decay, xi: (
         ('cweights',  lambda opt, w, prev_val: w.value()),
         ('grads2', lambda vars, w, prev_val: prev_val*0.0 ),
     ],
+    'fisher_vars': {
+    	'method': lambda opt: fishers(opt.model)
+    },
     'regularizer_fn': importancePenalty,
 })
 
@@ -126,28 +131,35 @@ reset_optimizer = False
 # import all permuted datasets (paths = local paths in filesystem)
 def createRandomizedDataset():
 
-	tasks = ['MNIST_Basic','MNIST_Rotated', 'MNIST_Noise1', 'MNIST_Noise3', 'MNIST_Noise5']
+	tasks = [l7.MNIST_Basic(), l7.MNIST_Rotated(), l7.MNIST_Noise1(), \
+			 l7.MNIST_Noise3(), l7.MNIST_Noise5()]
 
-	datasets = list()
+	datasets = dict()
 	for i in range(len(tasks)):
 		name = tasks[i]
-		ref = getattr(l7.dataset, name)
-		task = ref.classification_task()
+		task = name.classification_task()
 		raw_data, raw_labels = task 
 		classes = 10
-		training_ex = len(raw_data) * 1/7
+		
 		labels = np_utils.to_categorical(raw_labels, classes)
-		data = raw_data.reshape(x_train.shape[0], img_rows * img_cols)
-		datasets[i] = {"train": data[:training_ex], "test": data[training_ex:], \
-		               "trainlabels":labels[:training_ex], "tstlabels":labels[training_ex:]}
+
+		data = raw_data.reshape(raw_data.shape[0], img_rows * img_cols)
+		
+		data = raw_data
+		training_ex = int(len(data) * 5/7)
+		valid_ex = int(len(data) * 1/7) + training_ex
+
+		datasets[i] = {"train": data[:training_ex], "test": data[valid_ex:], \
+						"valid": data[training_ex : valid_ex], "validlabels": labels[training_ex : valid_ex], \
+		               "trainlabels": labels[:training_ex], "tstlabels": labels[valid_ex:]}
 	return datasets
 
 def importData():
 	srcs = [("original", "original/original/original", "original/original/test-original"),\
 			("rot90", "rot90/rot90", "rot90/rot90/test-rot90"), \
 			("fliplr", "fliplr/fliplr/fliplr", "fliplr/fliplr/test-fliplr"), #\
-			("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
-			("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
+			#("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
+			#("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
 			#("inv", "Inv/Inv/inv", "inv/inv/test-inv"), \
 			#("cutud","cutud/cutud/cutUD", "cutud/cutud/test-cutud"),\
 			#("invbot", "invbot/invbot/invbot", "invbot/invbot/test-invbot"), ]
@@ -202,9 +214,9 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 			  optimizer=oopt,
 			  metrics=['accuracy'])
 
-#data = createRandomizedDataset()
+data = createRandomizedDataset()
 config = tf.ConfigProto()
-data = importData()
+#data = importData()
 sess = tf.InteractiveSession(config=config)
 sess.run(tf.global_variables_initializer())
 
@@ -222,22 +234,22 @@ for strength in strengths:
 	evals[strength] = dict()
 
 	for train in training_order:
-		filename = "{0}{1}2.txt".format(fn, train)
+		filename = "{0}{1}random.txt".format(fn, train)
 		file = open(filename, 'w+')
 		evals[strength][train] = list()
 		mess = "Training on task {0}".format(train)
 		print(mess)
 		file.write(mess)
 		oopt.set_nb_data(len(data[train]["train"]))
-		model.fit(data[train]["train"], y_train,
+		model.fit(data[train]["valid"], data[train]["validlabels"],
 				  batch_size=batch_size,
 				  epochs=epochs,
 				  verbose=1,
-				  validation_data=(data[train]["test"], y_test))
+				  validation_data=(data[train]["test"], data[train]["tstlabels"]))
 
 		scores = dict()
 		for d in range(len(data.keys())):
-			scores[d] = model.evaluate(data[d]["test"], y_test, verbose=0)
+			scores[d] = model.evaluate(data[d]["test"], data[d]["tstlabels"], verbose=0)
 			mess = "Data set {0}:\nTest loss:{1}\ntest accuracy:{2}\n".format(d, scores[d][0], scores[d][1])
 			print(mess)
 			file.write(mess)
@@ -245,6 +257,8 @@ for strength in strengths:
 
 	if reset_optimizer:
 		 oopt.reset_optimizer()
+
+oopt.output_weights("weights.txt")
 
 
 

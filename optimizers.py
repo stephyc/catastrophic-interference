@@ -32,7 +32,7 @@ class SynapticOptimizer(Optimizer):
         #TODO: add names, better shape/init checking
         self.vars = {name: self._allocate_var(name=name) for name in names}
 
-    def __init__(self, opt, step_updates=[], task_updates=[], init_updates=[], task_metrics = {}, regularizer_fn=importancePenalty,
+    def __init__(self, opt, step_updates=[], task_updates=[], init_updates=[], task_metrics = {}, fisher_vars={}, regularizer_fn=importancePenalty,
                 lam=1.0, model=None, compute_average_loss=False, compute_average_weights=False, **kwargs):
         """Instantiate an optimzier that depends on its own updates.
 
@@ -83,6 +83,7 @@ class SynapticOptimizer(Optimizer):
         self.step_updates = step_updates
         self.task_updates = task_updates
         self.init_updates = init_updates
+        self.fisher_vars = fisher_vars
         self.compute_average_loss = compute_average_loss
         self.regularizer_fn = regularizer_fn
         # Compute loss and gradients
@@ -96,7 +97,26 @@ class SynapticOptimizer(Optimizer):
         self.task_metrics = task_metrics
         self.compute_average_weights = compute_average_weights
         self.saved_weights = dict()
+        self.saved_omegas = dict()
         self.epoch = 0
+
+    def get_omegas(self):
+    	return self.saved_omegas
+
+    def output_weights(self, filename):
+    	file = open(filename, 'w+')
+
+    	keys = self.saved_weights.keys()
+    	keys.sort()
+
+    	for key in keys:
+    		file.write(key)
+    		network = self.saved_weights[key]
+
+    		for layer in network:
+    			w = list(layer)
+    			file.write(w)
+    		file.write("\n")
 
     def set_strength(self, val):
         K.set_value(self.lam, val)
@@ -107,6 +127,8 @@ class SynapticOptimizer(Optimizer):
     def get_updates(self, weights, constraints, initial_loss, model=None):
         if(self.epoch % 10000 == 0):
             self.saved_weights[self.epoch] = weights
+            self.saved_omegas[self.epoch] = self.task_updates['omega']
+            print(self.saved_omegas)
         self.epoch += 1
 
         self.weights = weights
@@ -130,6 +152,7 @@ class SynapticOptimizer(Optimizer):
         # Compute updates
         self.vars['grads'] = dict(zip(weights, self._grads))
         self.vars['deltas'] = dict(zip(weights, self._deltas))
+
         # Keep a pointer to self in vars so we can use it in the updates
         self.vars['oopt'] = self
         # Keep number of data samples handy for normalization purposes
