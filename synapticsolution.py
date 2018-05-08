@@ -61,11 +61,12 @@ PATH_INT_PROTOCOL = lambda omega_decay, xi: (
 
 # Optimization parameters
 img_rows, img_cols = 28, 28
-train_size = 60000
+train_size = 50000
+valid_size = 10000
 test_size = 10000
 batch_size = 256
 num_classes = 10
-epochs = 20
+epochs = 10
 lr = 0.001
 xi = 0.1
 
@@ -102,8 +103,11 @@ def extract_labels(filename, num_images):
 
 # extracrt labels from local file
 train_labels = extract_labels("MNIST-data/train-labels-idx1-ubyte.gz", 60000)
+valid_labels = train_labels[50000:]
+train_labels = train_labels[:50000]
 eval_labels = extract_labels("MNIST-data/t10k-labels-idx1-ubyte.gz", 10000)
 y_train = keras.utils.to_categorical(train_labels, num_classes)
+y_valid = keras.utils.to_categorical(valid_labels, num_classes)
 y_test = keras.utils.to_categorical(eval_labels, num_classes)
 
 # create local dataset based off of permuted MNIST data
@@ -111,13 +115,20 @@ def createDataset(name, trainsrc, testsrc):
 	print("Beginning import:", name)
 	train = np.zeros((train_size, img_rows, img_cols), dtype=np.float32)
 	test = np.zeros((test_size, img_rows, img_cols), dtype=np.float32)
+	valid = np.zeros((valid_size, img_rows, img_cols), dtype=np.float32)
 
 	imgstrain = ["{0}{1}.png".format(trainsrc, k) for k in range(1, train_size)]
 	imgstest = ["MNIST-processed-test/{0}{1}.png".format(testsrc, k) for k in range(1, test_size + 1)]
+	imgsvalid = imgstrain[50000:]
+	imgstrain = imgstrain[:50000]
 
 	for i in range(len(imgstrain)):
 		img = np.array(Image.open(imgstrain[i]))
 		train[i, :, :] = img
+
+	for i in range(len(imgsvalid)):
+		img = np.array(Image.open(imgsvalid[i]))
+		valid[i, :, :] = img
 
 	for  i in range(len(imgstest)):
 		img = np.array(Image.open(imgstest[i]))
@@ -125,7 +136,7 @@ def createDataset(name, trainsrc, testsrc):
 
 	print("Completed import:", name)
 
-	return (train, test)
+	return (train, test, valid)
 
 reset_optimizer = False
 # import all permuted datasets (paths = local paths in filesystem)
@@ -157,9 +168,9 @@ def createRandomizedDataset():
 def importData():
 	srcs = [("original", "original/original/original", "original/original/test-original"),\
 			("rot90", "rot90/rot90", "rot90/rot90/test-rot90"), \
-			("fliplr", "fliplr/fliplr/fliplr", "fliplr/fliplr/test-fliplr"), #\
-			#("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
-			#("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
+			("fliplr", "fliplr/fliplr/fliplr", "fliplr/fliplr/test-fliplr"), \
+			("flipud", "flipud/flipud/flipud", "flipud/flipud/test-flipud"), \
+			("check", "checkerboard/checkerboard/fullcheck", "checkerboard/checkerboard/test-checkerboard"), \
 			#("inv", "Inv/Inv/inv", "inv/inv/test-inv"), \
 			#("cutud","cutud/cutud/cutUD", "cutud/cutud/test-cutud"),\
 			#("invbot", "invbot/invbot/invbot", "invbot/invbot/test-invbot"), ]
@@ -173,9 +184,11 @@ def importData():
 	for i in range(len(datasets)):
 		x_train = datasets[i][0]
 		x_test = datasets[i][1]
+		x_valid = datasets[i][2]
 		#if K.image_data_format() == 'channels_first':
 		x_train = x_train.reshape(x_train.shape[0], img_rows * img_cols)
 		x_test = x_test.reshape(x_test.shape[0], img_rows * img_cols)
+		x_valid = x_valid.reshape(x_valid.shape[0], img_rows * img_cols)
 		input_shape = (1, img_rows * img_cols)
 
 		"""
@@ -187,10 +200,12 @@ def importData():
 
 		x_train = x_train.astype('float32')
 		x_test = x_test.astype('float32')
+		x_valid = x_valid.astype('float32')
 		x_train /= 255
 		x_test /= 255
+		x_valid /= 255
 
-		data[i] = {"train": x_train, "test": x_test}
+		data[i] = {"train": x_train, "test": x_test, "valid": x_val}
 
 	return data
 
@@ -210,6 +225,8 @@ pro_name, pro = PATH_INT_PROTOCOL(omega_decay="sum", xi=xi)
 
 oopt = SO(opt=opt, model=model, **pro)
 
+oopt.createFiles("fishers.txt", "weights.txt")
+
 model.compile(loss=keras.losses.categorical_crossentropy,
 			  optimizer=oopt,
 			  metrics=['accuracy'])
@@ -224,7 +241,7 @@ ntasks = len(data)
 
 training_order = [2, 1, 0, 3, 4]
 #training_order = training_order[0:5]
-strengths = [0, 1.0]
+strengths = [0, 0.1, 0.5, 1.0]
 
 evals = dict()
 
@@ -234,18 +251,18 @@ for strength in strengths:
 	evals[strength] = dict()
 
 	for train in training_order:
-		filename = "{0}{1}random.txt".format(fn, train)
+		filename = "{0}{1}random2.txt".format(fn, train)
 		file = open(filename, 'w+')
 		evals[strength][train] = list()
 		mess = "Training on task {0}".format(train)
 		print(mess)
 		file.write(mess)
 		oopt.set_nb_data(len(data[train]["train"]))
-		model.fit(data[train]["valid"], data[train]["validlabels"],
+		model.fit(data[train]["train"], data[train]["trainlabels"],
 				  batch_size=batch_size,
 				  epochs=epochs,
 				  verbose=1,
-				  validation_data=(data[train]["test"], data[train]["tstlabels"]))
+				  validation_data=(data[train]["valid"], data[train]["validlabels"]))
 
 		scores = dict()
 		for d in range(len(data.keys())):
@@ -255,10 +272,16 @@ for strength in strengths:
 			file.write(mess)
 		file.close() 
 
+		oopt.print_weight_state()
+		oopt.print_fisher_state()
+
 	if reset_optimizer:
 		 oopt.reset_optimizer()
 
-oopt.output_weights("weights.txt")
+
+
+
+oopt.closeFiles()
 
 
 

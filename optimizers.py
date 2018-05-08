@@ -20,7 +20,7 @@ from keras.callbacks import Callback
 from utils import extract_weight_changes, compute_updates
 from synapticpenalty import importancePenalty
 from collections import OrderedDict
-
+from fisher_comp import fishers
 
 class SynapticOptimizer(Optimizer):
     """An optimizer whose loss depends on its own updates."""
@@ -97,26 +97,27 @@ class SynapticOptimizer(Optimizer):
         self.task_metrics = task_metrics
         self.compute_average_weights = compute_average_weights
         self.saved_weights = dict()
-        self.saved_omegas = dict()
+
         self.epoch = 0
+        np.set_printoptions(threshold=1000000)
+
+    def closeFiles(self):
+        try:
+            self.weightfile.close()
+            self.fisherfile.close()
+        except Error:
+            print("FILE NOT FOUND")
+
+    def createFiles(self, fishername, weightname):
+        self.weight_filename = weightname
+        self.fisher_filename = fishername
+
+        self.weightfile = open(self.weight_filename, 'w+')
+        self.fisherfile = open(self.fisher_filename, 'w+')
 
     def get_omegas(self):
     	return self.saved_omegas
 
-    def output_weights(self, filename):
-    	file = open(filename, 'w+')
-
-    	keys = self.saved_weights.keys()
-    	keys.sort()
-
-    	for key in keys:
-    		file.write(key)
-    		network = self.saved_weights[key]
-
-    		for layer in network:
-    			w = list(layer)
-    			file.write(w)
-    		file.write("\n")
 
     def set_strength(self, val):
         K.set_value(self.lam, val)
@@ -124,12 +125,18 @@ class SynapticOptimizer(Optimizer):
     def set_nb_data(self, nb):
         K.set_value(self.nb_data, nb)
 
+    def print_weight_state(self):
+            for weight in self.weights:
+                self.weightfile.write(np.array_str(K.get_value(weight)))
+
+
+    def print_fisher_state(self):
+    	for fish in self._fishers:
+    		self.fisherfile.write(np.array_str(K.get_value(fish)))
+
+
     def get_updates(self, weights, constraints, initial_loss, model=None):
-        if(self.epoch % 10000 == 0):
-            self.saved_weights[self.epoch] = weights
-            self.saved_omegas[self.epoch] = self.task_updates['omega']
-            print(self.saved_omegas)
-        self.epoch += 1
+
 
         self.weights = weights
         # Allocate variables
@@ -176,11 +183,12 @@ class SynapticOptimizer(Optimizer):
                 self.delta_loss = tf.Variable(0.0, trainable=False, name="delta_loss")
             self.ema_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)
             self.init_ema_vars = tf.variables_initializer(self.ema_vars)
-#        if self.compute_fisher:
-#            self._fishers, _, _, _ = compute_fishers(self.model)
-#            #fishers = compute_fisher_information(model)
-#            self.vars['fishers'] = dict(zip(weights, self._fishers))
-#            #fishers, avg_fishers, update_fishers, zero_fishers = compute_fisher_information(model)
+        if self.fisher_vars:
+            self._fishers = fishers(self.model)
+            #fish = compute_fisher_information(model)
+            #self.vars['fishers'] = dict(zip(weights, self._fishers))
+          	#fishers, avg_fishers, update_fishers, zero_fishers = compute_fisher_information(model)
+
 
         def _var_update(vars, update_fn):
             updates = []
@@ -229,6 +237,8 @@ class SynapticOptimizer(Optimizer):
             self.delta_loss = self.prev_loss - self.ema_loss
 
         return self.updates#[self._base_updates
+
+
 
     def init_task_vars(self):
         K.get_session().run([self.init_op])
