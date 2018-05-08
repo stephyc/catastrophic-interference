@@ -193,6 +193,7 @@ for i = 1:10
 end
 
 %% Plotting: correlations (dataset to dataset, z-score per dataset, opt. abs val)
+% the next section is more meaningful, btw
 
 for i = 1:10
     im = figure(i);
@@ -207,7 +208,7 @@ for i = 1:10
     yticklabels(maniplabels);
     title(['Dataset to dataset mean image correlation z-scored (over dataset): ', int2str(i - 1)]);
     colorbar
-    caxis([0, 1])
+    % caxis([-1, 1])
 end
 
 %% Plotting: correlations (dataset to dataset, z-score overall, opt. abs val)
