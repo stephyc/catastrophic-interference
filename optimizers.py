@@ -10,6 +10,12 @@
 #
 """Optimization algorithms."""
 
+""" Title: Continuous learning through synaptic intelligence.
+    Source: Zenke, F. et al.
+    Date: 2017 
+    Location: https://github.com/fzenke/pathint
+"""
+
 import tensorflow as tf
 
 import numpy as np
