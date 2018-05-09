@@ -13,6 +13,10 @@
 import tensorflow as tf
 
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pylab import figure, axes, pie, title, show
+import seaborn as sb
+
 import keras
 from keras import backend as K
 from keras.optimizers import Optimizer
@@ -20,7 +24,6 @@ from keras.callbacks import Callback
 from utils import extract_weight_changes, compute_updates
 from synapticpenalty import importancePenalty
 from collections import OrderedDict
-from fisher_comp import fishers
 
 class SynapticOptimizer(Optimizer):
     """An optimizer whose loss depends on its own updates."""
@@ -32,7 +35,7 @@ class SynapticOptimizer(Optimizer):
         #TODO: add names, better shape/init checking
         self.vars = {name: self._allocate_var(name=name) for name in names}
 
-    def __init__(self, opt, step_updates=[], task_updates=[], init_updates=[], task_metrics = {}, fisher_vars={}, regularizer_fn=importancePenalty,
+    def __init__(self, opt, step_updates=[], task_updates=[], init_updates=[], task_metrics = {}, regularizer_fn=importancePenalty,
                 lam=1.0, model=None, compute_average_loss=False, compute_average_weights=False, **kwargs):
         """Instantiate an optimzier that depends on its own updates.
 
@@ -83,7 +86,7 @@ class SynapticOptimizer(Optimizer):
         self.step_updates = step_updates
         self.task_updates = task_updates
         self.init_updates = init_updates
-        self.fisher_vars = fisher_vars
+        # self.fisher_vars = fisher_vars
         self.compute_average_loss = compute_average_loss
         self.regularizer_fn = regularizer_fn
         # Compute loss and gradients
@@ -108,6 +111,50 @@ class SynapticOptimizer(Optimizer):
         except Error:
             print("FILE NOT FOUND")
 
+    def outputImageData(self, tasknumber, strength):
+    	fisher_fn = "fisher_task{0}_strength{1}nobounds.png"
+    	weight_fn = "weight_task{0}_strength{1}nobounds.png"
+
+    	reshaped = list()
+
+    	for weight in self.weights:
+    		wt = K.get_value(weight)
+    		
+    		if wt.size >= 2000:
+	    		rows = wt.size/2000
+	    		dat = np.reshape(wt, (int(rows), 2000))
+	    		reshaped.append(dat)
+
+    	weight_dat = np.concatenate(reshaped)
+    	wfn = sb.heatmap(weight_dat, cmap="coolwarm")
+    	wfg = wfn.get_figure()
+
+
+    	name = weight_fn.format(tasknumber, strength)
+    	wfg.savefig(name)
+
+    	wfg.clf()
+
+    	reshaped = list()
+    	# for fish in self._fishers:
+    	# 	dat = K.get_value(fish)
+
+
+    	# 	if dat.size >= 2000:
+    	# 		dat = np.reshape(dat, (int(dat.size/2000), 2000))
+    	# 		reshaped.append(dat)
+
+    	# fish_dat = np.concatenate(reshaped)
+    	# ffn = sb.heatmap(fish_dat, cmap="coolwarm")
+    	# ffg = ffn.get_figure()
+    	# name = fisher_fn.format(tasknumber, strength)
+
+    	# ffg.savefig(name)
+
+    	# ffg.clf()
+
+
+
     def createFiles(self, fishername, weightname):
         self.weight_filename = weightname
         self.fisher_filename = fishername
@@ -130,9 +177,9 @@ class SynapticOptimizer(Optimizer):
                 self.weightfile.write(np.array_str(K.get_value(weight)))
 
 
-    def print_fisher_state(self):
-    	for fish in self._fishers:
-    		self.fisherfile.write(np.array_str(K.get_value(fish)))
+    # def print_fisher_state(self):
+    # 	for fish in self._fishers:
+    # 		self.fisherfile.write(np.array_str(K.get_value(fish)))
 
 
     def get_updates(self, weights, constraints, initial_loss, model=None):
@@ -183,8 +230,8 @@ class SynapticOptimizer(Optimizer):
                 self.delta_loss = tf.Variable(0.0, trainable=False, name="delta_loss")
             self.ema_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)
             self.init_ema_vars = tf.variables_initializer(self.ema_vars)
-        if self.fisher_vars:
-            self._fishers = fishers(self.model)
+        # if self.fisher_vars:
+        #     self._fishers = fishers(self.model)
             #fish = compute_fisher_information(model)
             #self.vars['fishers'] = dict(zip(weights, self._fishers))
           	#fishers, avg_fishers, update_fishers, zero_fishers = compute_fisher_information(model)
