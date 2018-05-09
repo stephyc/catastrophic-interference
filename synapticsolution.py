@@ -53,9 +53,6 @@ PATH_INT_PROTOCOL = lambda omega_decay, xi: (
         ('cweights',  lambda opt, w, prev_val: w.value()),
         ('grads2', lambda vars, w, prev_val: prev_val*0.0 ),
     ],
-    'fisher_vars': {
-    	'method': lambda opt: fishers(opt.model)
-    },
     'regularizer_fn': importancePenalty,
 })
 
@@ -79,6 +76,7 @@ output_fn = tf.nn.softmax
 input_size = 784
 output_size = 10
 
+# reset the weight state of a model
 def reset_weights(model):
     session = K.get_session()
     for layer in model.layers:
@@ -117,11 +115,13 @@ def createDataset(name, trainsrc, testsrc):
 	test = np.zeros((test_size, img_rows, img_cols), dtype=np.float32)
 	valid = np.zeros((valid_size, img_rows, img_cols), dtype=np.float32)
 
+	# create and import image sets
 	imgstrain = ["{0}{1}.png".format(trainsrc, k) for k in range(1, train_size)]
 	imgstest = ["MNIST-processed-test/{0}{1}.png".format(testsrc, k) for k in range(1, test_size + 1)]
 	imgsvalid = imgstrain[50000:]
 	imgstrain = imgstrain[:50000]
 
+	# reshape data
 	for i in range(len(imgstrain)):
 		img = np.array(Image.open(imgstrain[i]))
 		train[i, :, :] = img
@@ -134,17 +134,20 @@ def createDataset(name, trainsrc, testsrc):
 		img = np.array(Image.open(imgstest[i]))
 		test[i, :, :] = img
 
+	# tracking message
 	print("Completed import:", name)
 
 	return (train, test, valid)
 
 reset_optimizer = False
-# import all permuted datasets (paths = local paths in filesystem)
+# import skdata sets
 def createRandomizedDataset():
 
+	# chosen tasks
 	tasks = [l7.MNIST_Basic(), l7.MNIST_Rotated(), l7.MNIST_Noise1(), \
 			 l7.MNIST_Noise3(), l7.MNIST_Noise5()]
 
+	# costruct datasets
 	datasets = dict()
 	for i in range(len(tasks)):
 		name = tasks[i]
@@ -165,6 +168,7 @@ def createRandomizedDataset():
 		               "trainlabels": labels[:training_ex], "tstlabels": labels[valid_ex:]}
 	return datasets
 
+# import local filepath data
 def importData():
 	srcs = [("original", "original/original/original", "original/original/test-original"),\
 			("rot90", "rot90/rot90", "rot90/rot90/test-rot90"), \
@@ -175,7 +179,7 @@ def importData():
 			#("cutud","cutud/cutud/cutUD", "cutud/cutud/test-cutud"),\
 			#("invbot", "invbot/invbot/invbot", "invbot/invbot/test-invbot"), ]
 			]
-
+	# construct datasets
 	datasets = list(map(lambda x: createDataset(x[0], x[1], x[2]), srcs))
 
 	data = dict()
@@ -222,15 +226,17 @@ model.add(Dense(output_size, activation=output_fn))
 # build optimizer
 opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 pro_name, pro = PATH_INT_PROTOCOL(omega_decay="sum", xi=xi)
-
 oopt = SO(opt=opt, model=model, **pro)
 
+# create output data files
 oopt.createFiles("fishers.txt", "weights.txt")
 
+# compile model
 model.compile(loss=keras.losses.categorical_crossentropy,
 			  optimizer=oopt,
 			  metrics=['accuracy'])
 
+# create dataset (either skdata or customized sets)
 data = createRandomizedDataset()
 config = tf.ConfigProto()
 #data = importData()
@@ -239,19 +245,24 @@ sess.run(tf.global_variables_initializer())
 
 ntasks = len(data)
 
+# decide training order (or randomize order)
 training_order = [2, 1, 0, 3, 4]
 #training_order = training_order[0:5]
-strengths = [0, 0.1, 0.5, 1.0]
+
+# order of strengths to regularize
+strengths = [0.0, 0.2, 0.5, 1.0]
 
 evals = dict()
 
+# train network on strengths
 for strength in strengths:
 	print("setting strength: {0}".format(strength))
 	oopt.set_strength(strength)
 	evals[strength] = dict()
 
+	# train network on chosen task
 	for train in training_order:
-		filename = "{0}{1}random2.txt".format(fn, train)
+		filename = "{0}{1}random2retrial{2}.txt".format(fn, train, strength)
 		file = open(filename, 'w+')
 		evals[strength][train] = list()
 		mess = "Training on task {0}".format(train)
@@ -264,54 +275,28 @@ for strength in strengths:
 				  verbose=1,
 				  validation_data=(data[train]["valid"], data[train]["validlabels"]))
 
+		# test on other tasks
 		scores = dict()
 		for d in range(len(data.keys())):
 			scores[d] = model.evaluate(data[d]["test"], data[d]["tstlabels"], verbose=0)
-			mess = "Data set {0}:\nTest loss:{1}\ntest accuracy:{2}\n".format(d, scores[d][0], scores[d][1])
+			mess = "Data set {0}:\nScore:{1}\n".format(d, scores[d])
 			print(mess)
 			file.write(mess)
 		file.close() 
 
+		# print weight image, weights
+		oopt.outputImageData(train, strength)
 		oopt.print_weight_state()
 		oopt.print_fisher_state()
 
+	# potentially reset optimizer
 	if reset_optimizer:
 		 oopt.reset_optimizer()
 
 
 
-
+# close open files
 oopt.closeFiles()
-
-
-
-"""
-cNorm  = colors.Normalize(vmin=-5, vmax=np.log(np.max(list(evals.keys()))))
-scalarMap = cm.ScalarMappable(norm=cNorm, cmap=cmap)
-print(scalarMap.get_clim())
-
-plt.figure(figsize=(14, 4))
-axs = [plt.subplot(1, ntasks + 1, 1)]
-for i in range(1, ntasks + 1):
-	axs.append(plt.subplot(1, ntasks + 1, i + 1, sharex=axs[0], sharey = axs[0]))
-
-fmts = ['o', 's']
-keys = sorted(evals.keys())
-
-for strength in keys:
-	results = evals[strength]
-	label = "c=%g"%strength
-	for i in range(ntasks + 1):
-		col = scalarMap.to_rgba(np.log(strength))
-		
-		axs[i].plot(results[:, i], c=col, label=label)
-
-for i, ax in enumerate(axs):
-	ax.legend(bbox_to_anchor=(1.0, 1.0))
-	ax.set_title((['task %d'%j for j in range(n_tasks)] + ['average'])[i])
-gcf().tight_layout()
-"""
-
 
 
 
