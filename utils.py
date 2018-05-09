@@ -9,6 +9,12 @@
 # Centre, Sydney, Australia: PMLR), pp. 3987-3995.
 # http://proceedings.mlr.press/v70/zenke17a.html
 #
+
+""" Title: Continuous learning through synaptic intelligence.
+    Source: Zenke, F. et al.
+    Date: 2017 
+    Location: https://github.com/fzenke/pathint
+"""
 """Utility functions for benchmarking online learning"""
 from __future__ import division
 import numpy as np
